@@ -1,0 +1,122 @@
+---
+import { upcomingConcerts, pastConcerts } from '../data/concerts';
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('de-DE', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+// Generate structured data for SEO
+const generateStructuredData = () => {
+  const events = [...upcomingConcerts, ...pastConcerts].map(concert => ({
+    '@context': 'https://schema.org',
+    '@type': 'MusicEvent',
+    'name': concert.description.split(' ')[0] + ' Konzert',
+    'description': concert.description,
+    'startDate': `${concert.date}T${concert.time}:00`,
+    'endDate': `${concert.date}T${concert.time}:00`,
+    'location': {
+      '@type': 'Place',
+      'name': concert.venue,
+      'address': {
+        '@type': 'PostalAddress',
+        'addressLocality': concert.location,
+        'addressCountry': 'DE'
+      }
+    },
+    'performer': {
+      '@type': 'MusicGroup',
+      'name': 'Purple Noise'
+    },
+    'offers': {
+      '@type': 'Offer',
+      'url': 'https://www.purple-noise.de/#concerts',
+      'availability': concert.isPast ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock'
+    }
+  }));
+
+  return JSON.stringify(events);
+};
+---
+
+<section id="concerts" class="py-20 bg-(--color-accent)">
+  <div class="container mx-auto px-6">
+    <!-- Section Header -->
+    <div class="text-center mb-16 fade-in-section">
+      <h2 class="text-4xl md:text-5xl font-bold text-(--color-dark) mb-4">
+        Konzerte
+      </h2>
+      <p class="text-(--color-dark)/80 text-lg max-w-2xl mx-auto">
+        Erlebe unsere kommenden Aufführungen und entdecke die Vielfalt unserer Chormusik.
+      </p>
+    </div>
+    
+    <!-- Upcoming Concerts -->
+    <div class="mb-16 fade-in-section">
+      <h3 class="text-2xl font-semibold text-(--color-dark) mb-8 flex items-center">
+        <span class="w-2 h-8 bg-(--color-primary) mr-4 rounded"></span>
+        Kommende Konzerte
+      </h3>
+      
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {upcomingConcerts.map((concert) => (
+          <article class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-(--color-primary)/20 transition-shadow duration-300">
+            <div class="p-6">
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                  <p class="text-(--color-primary) font-semibold text-lg">
+                    {formatDate(concert.date)}
+                  </p>
+                  <p class="text-(--color-dark)/70">{concert.time} Uhr</p>
+                </div>
+              </div>
+              
+              <h4 class="text-xl font-semibold text-(--color-dark) mb-2">{concert.venue}</h4>
+              <p class="text-(--color-dark)/70 mb-4">{concert.location}</p>
+              <p class="text-(--color-dark)/70 text-sm">{concert.description}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+    
+    <!-- Past Concerts -->
+    {pastConcerts.length > 0 && (
+      <div class="fade-in-section">
+        <h3 class="text-2xl font-semibold text-(--color-dark) mb-8 flex items-center">
+          <span class="w-2 h-8 bg-(--color-primary) mr-4 rounded"></span>
+          Vergangene Konzerte
+        </h3>
+        
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 opacity-75">
+          {pastConcerts.map((concert) => (
+            <article class="bg-white rounded-lg overflow-hidden shadow-lg">
+              <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex-1">
+                    <p class="text-(--color-primary) font-semibold text-lg">
+                      {formatDate(concert.date)}
+                    </p>
+                    <p class="text-(--color-dark)/60">{concert.time} Uhr</p>
+                  </div>
+                </div>
+                
+                <h4 class="text-xl font-semibold text-(--color-dark) mb-2">{concert.venue}</h4>
+                <p class="text-(--color-dark)/70 mb-4">{concert.location}</p>
+                <p class="text-(--color-dark)/70 text-sm">{concert.description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<!-- Structured Data for SEO -->
+<script type="application/ld+json" set:html={generateStructuredData()} />
