@@ -1,0 +1,58 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation';
+import Hero from '../components/Hero';
+import Concerts from '../components/Concerts.astro';
+import Rehearsals from '../components/Rehearsals.astro';
+import Contact from '../components/Contact';
+---
+
+<Layout title="Purple Noise">
+    {/* Navigation with Client-side interactivity (includes menu) */}
+    <Navigation client:load />
+
+    {/* Hero Section */}
+    <Hero client:load />
+
+    {/* Main Content */}
+    <main>
+        <Concerts />
+        <Rehearsals />
+        <Contact client:load />
+    </main>
+
+    {/* Footer */}
+    <footer class="bg-(--color-dark) py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-(--color-text-muted)">
+                &copy; 2026 Purple Noise - Der Chor
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scroll Animation Observer -->
+    <script>
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all fade-in sections
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.fade-in-section');
+            sections.forEach((section) => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</Layout>
