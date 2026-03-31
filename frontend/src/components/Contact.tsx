@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {type ChangeEvent, type FormEvent} from 'react';
 import { useState, useCallback } from 'react';
 
 const contactInfo = {
@@ -11,11 +11,23 @@ const contactInfo = {
     ],
 };
 
+interface ContactForm {
+    name: string;
+    email: string;
+    message: string;
+}
+
+interface FormErrors {
+    name?: string;
+    email?: string;
+    message?: string;
+}
+
 /**
  * Validates form fields and returns error messages
  */
-const validateForm = (formData)=> {
-    const errors = {};
+const validateForm = (formData: ContactForm)=> {
+    const errors: FormErrors = {};
 
     if (!formData.name.trim()) {
         errors.name = "Bitte gib deinen Namen ein.";
@@ -43,20 +55,20 @@ const validateForm = (formData)=> {
  * Displays contact information and a contact form with validation.
  */
 export default function Contact() {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<ContactForm>({
         name: '',
         email: '',
         message: '',
     });
-    const [errors, setErrors] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [errors, setErrors] = useState<FormErrors>({});
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
 
-    const handleSubmit = useCallback((e) => {
+    const handleSubmit = useCallback((e: FormEvent): void => {
         e.preventDefault();
 
         // Validate form
-        const validationErrors = validateForm(formData);
+        const validationErrors: FormErrors = validateForm(formData);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
@@ -66,7 +78,7 @@ export default function Contact() {
         setIsSubmitting(true);
 
         // Simulate form submission (replace with actual API call)
-        setTimeout(() => {
+        setTimeout((): void => {
             setIsSubmitting(false);
             setSubmitSuccess(true);
             setFormData({ name: '', email: '', message: '' });
@@ -76,13 +88,13 @@ export default function Contact() {
         }, 1000);
     }, [formData]);
 
-    const handleChange = useCallback((e) => {
+    const handleChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((prev: ContactForm) => ({ ...prev, [name]: value }));
 
         // Clear error for this field when user starts typing
-        if (errors[name]) {
-            setErrors((prev) => ({ ...prev, [name]: undefined }));
+        if (errors[name as keyof FormErrors]) {
+            setErrors((prev: FormErrors) => ({ ...prev, [name]: undefined }));
         }
     }, [errors]);
 

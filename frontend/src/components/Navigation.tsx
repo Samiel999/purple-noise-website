@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import {useState, useEffect, useRef, useCallback, type RefObject} from 'react';
 
 /**
  * Navigation Component
@@ -11,20 +11,20 @@ import { useState, useEffect, useRef, useCallback } from 'react';
  * - Accessible with ARIA labels
  */
 export default function Navigation() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const menuRef = useRef(null);
-    const buttonRef = useRef(null);
-    const previousActiveElement = useRef(null);
+    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+    const menuRef: RefObject<HTMLElement | null> | undefined = useRef(null);
+    const buttonRef: RefObject<HTMLButtonElement | null> = useRef(null);
+    const previousActiveElement: RefObject<HTMLElement | Element | null> = useRef(null);
 
-    const handleMenuToggle = useCallback(() => {
-        setIsMenuOpen((prev) => !prev);
+    const handleMenuToggle = useCallback((): void => {
+        setIsMenuOpen((prev: boolean) => !prev);
     }, []);
 
-    const handleLinkClick = useCallback(() => {
+    const handleLinkClick = useCallback((): void => {
         setIsMenuOpen(false);
     }, []);
 
-    const closeMenu = useCallback(() => {
+    const closeMenu = useCallback((): void => {
         setIsMenuOpen(false);
     }, []);
 
@@ -38,7 +38,7 @@ export default function Navigation() {
             document.body.style.overflow = 'hidden';
 
             // Focus the first focusable element in the menu
-            const focusableElements = menuRef.current?.querySelectorAll(
+            const focusableElements: NodeListOf<HTMLElement> | undefined = menuRef.current?.querySelectorAll(
                 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
             );
             if (focusableElements && focusableElements.length > 0) {
@@ -46,7 +46,7 @@ export default function Navigation() {
             }
 
             // Add escape key listener
-            const handleEscape = (e) => {
+            const handleEscape = (e: KeyboardEvent): void => {
                 if (e.key === 'Escape') {
                     closeMenu();
                 }
@@ -54,13 +54,15 @@ export default function Navigation() {
 
             document.addEventListener('keydown', handleEscape);
 
-            return () => {
+            return (): void => {
                 document.removeEventListener('keydown', handleEscape);
                 document.body.style.overflow = '';
 
                 // Restore focus to the button that opened the menu
                 if (previousActiveElement.current) {
-                    previousActiveElement.current.focus();
+                    if ("focus" in previousActiveElement.current) {
+                        previousActiveElement.current.focus();
+                    }
                 }
             };
         }
@@ -70,17 +72,17 @@ export default function Navigation() {
     useEffect(() => {
         if (!isMenuOpen) return;
 
-        const handleTabKey = (e) => {
+        const handleTabKey = (e: KeyboardEvent) => {
             if (e.key !== 'Tab') return;
 
-            const focusableElements = menuRef.current?.querySelectorAll(
+            const focusableElements: NodeListOf<HTMLElement> | undefined = menuRef.current?.querySelectorAll(
                 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
             );
 
             if (!focusableElements || focusableElements.length === 0) return;
 
-            const firstElement = focusableElements[0];
-            const lastElement = focusableElements[focusableElements.length - 1];
+            const firstElement: HTMLElement = focusableElements[0];
+            const lastElement: HTMLElement = focusableElements[focusableElements.length - 1];
 
             if (e.shiftKey && document.activeElement === firstElement) {
                 e.preventDefault();

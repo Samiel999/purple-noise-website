@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {type JSX, type RefObject} from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { carouselSlides} from '../data/slides';
 
@@ -12,26 +12,26 @@ import { carouselSlides} from '../data/slides';
  * - Keyboard navigation support
  * - Accessible with ARIA labels
  */
-export default function Hero() {
-    const [activeSlide, setActiveSlide] = useState(0);
-    const [isPaused, setIsPaused] = useState(false);
-    const intervalRef = useRef(null);
+export default function Hero(): JSX.Element {
+    const [activeSlide, setActiveSlide] = useState<number>(0);
+    const [isPaused, setIsPaused] = useState<boolean>(false);
+    const intervalRef: RefObject<NodeJS.Timeout | null> = useRef(null);
 
-    const nextSlide = useCallback(() => {
-        setActiveSlide((prev) => (prev === carouselSlides.length - 1 ? 0 : prev + 1));
+    const nextSlide = useCallback((): void => {
+        setActiveSlide((prev: number): number => (prev === carouselSlides.length - 1 ? 0 : prev + 1));
     }, []);
 
-    const prevSlide = useCallback(() => {
-        setActiveSlide((prev) => (prev === 0 ? carouselSlides.length - 1 : prev - 1));
+    const prevSlide = useCallback((): void => {
+        setActiveSlide((prev: number): number => (prev === 0 ? carouselSlides.length - 1 : prev - 1));
     }, []);
 
-    const goToSlide = useCallback((index) => {
+    const goToSlide = useCallback((index: number): void => {
         setActiveSlide(index);
     }, []);
 
     // Auto-advance slides with pause on hover
     useEffect(() => {
-        const startInterval = () => {
+        const startInterval = (): void => {
             if (!isPaused) {
                 intervalRef.current = setInterval(nextSlide, 5000);
             }
@@ -39,7 +39,7 @@ export default function Hero() {
 
         startInterval();
 
-        return () => {
+        return (): void => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
             }
@@ -48,7 +48,7 @@ export default function Hero() {
 
     // Handle keyboard navigation
     useEffect(() => {
-        const handleKeyDown = (e) => {
+        const handleKeyDown = (e: KeyboardEvent): void => {
             if (e.key === 'ArrowLeft') {
                 prevSlide();
             } else if (e.key === 'ArrowRight') {

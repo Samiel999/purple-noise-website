@@ -1,5 +1,7 @@
 ---
 import { upcomingConcerts, pastConcerts, type Concert } from '../data/concerts';
+// import from 'fs';
+// import {readFile} from "node:fs";
 
 function formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -10,6 +12,12 @@ function formatDate(dateString: string): string {
         day: 'numeric',
     });
 }
+
+// let upcomingConcerts: Concert[];
+//
+// readFile('../data/concerts.json', 'utf-8', (err, data) => {
+//
+// })
 
 // Generate structured data for SEO
 const generateStructuredData = () => {
