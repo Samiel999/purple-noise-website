@@ -1,0 +1,81 @@
+---
+import { regularRehearsals, rehearsalInfo } from '../data/rehearsals';
+---
+
+<section id="rehearsals" class="py-20 bg-(--color-dark)">
+    <div class="container mx-auto px-6">
+        <!-- Section Header -->
+        <div class="text-center mb-16 fade-in-section">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                Probentermine
+            </h2>
+            <p class="text-(--color-text-muted) text-lg max-w-2xl mx-auto">
+                Bei uns findest du deine Stimme. Komm vorbei und erlebe die Freude am gemeinsamen Singen!
+            </p>
+        </div>
+
+        <!-- Welcome Text -->
+        <div class="text-center mb-12 fade-in-section">
+            <p class="text-white text-lg max-w-3xl mx-auto leading-relaxed">
+                {rehearsalInfo.welcomeText}
+            </p>
+        </div>
+
+        <!-- Rehearsal Cards -->
+        <div class="max-w-2xl mx-auto mb-12">
+            {regularRehearsals.map((rehearsal, index) => (
+                    <div class="bg-(--color-dark-secondary) rounded-lg p-8 shadow-lg hover:shadow-(--color-primary)/20 transition-all duration-300 fade-in-section" style={`animation-delay: ${index * 0.1}s`}>
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-(--color-primary)/20 rounded-full flex items-center justify-center mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-(--color-primary)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-semibold text-white">{rehearsal.dayOfWeek}</h3>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center text-(--color-text-muted)">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-(--color-accent)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{rehearsal.time}</span>
+                            </div>
+
+                            <div class="flex items-start text-(--color-text-muted)">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-(--color-accent) mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <div>
+                                    <p class="text-white">{rehearsal.venue}</p>
+                                    <p class="text-sm">{rehearsal.location}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-6 border-t border-(--color-primary)/20">
+                            <p class="text-(--color-text-muted) text-sm italic">
+                                {rehearsal.notes}
+                            </p>
+                        </div>
+                    </div>
+            ))}
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-linear-to-r from-(--color-primary)/20 to-(--color-accent)/20 rounded-lg p-8 max-w-3xl mx-auto fade-in-section">
+            <div class="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-(--color-accent) mr-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                    <h4 class="text-xl font-semibold text-white mb-2">Interesse geweckt?</h4>
+                    <p class="text-(--color-text-muted)">
+                        {rehearsalInfo.contactForNewMembers}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
