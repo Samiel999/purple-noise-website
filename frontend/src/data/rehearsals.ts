@@ -1,3 +1,5 @@
+import rehearsalsData from '../../public/data/rehearsals.json';
+
 export interface Rehearsal {
   dayOfWeek: string;
   time: string;
@@ -6,17 +8,16 @@ export interface Rehearsal {
   notes: string;
 }
 
-export const regularRehearsals: Rehearsal[] = [
-  {
-    dayOfWeek: "Dienstag",
-    time: "19:00 - 21:00",
-    location: "Wichertstraße 24, Berlin",
-    venue: "W24 Jugendzentrum",
-    notes: "Wöchentlicher Probentermin, neue Mitglieder sind herzlich willkommen",
-  },
-];
+export interface RehearsalInfo {
+  welcomeText: string;
+  contactForNewMembers: string;
+}
 
-export const rehearsalInfo = {
-  welcomeText: "Unser Chor probt regelmäßig und freut sich über neue Mitglieder. Egal ob erfahrener Sänger oder Anfänger - bei uns findest du deine Stimme!",
-  contactForNewMembers: "Bei Interesse an einer Probeteilnahme oder weiteren Informationen kontaktiere uns gerne!",
+const data = rehearsalsData as {
+  regularRehearsals: Rehearsal[];
+  rehearsalInfo: RehearsalInfo;
 };
+
+export const regularRehearsals: Rehearsal[] = data.regularRehearsals;
+export const rehearsalInfo: RehearsalInfo = data.rehearsalInfo;
+
