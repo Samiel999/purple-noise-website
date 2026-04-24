@@ -1,6 +1,6 @@
-import React, {type JSX, type RefObject} from 'react';
+import { type JSX, type RefObject, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { carouselSlides} from '../data/slides';
+import { type Slide } from '../data/slides';
 
 /**
  * Hero Carousel Component
@@ -13,17 +13,35 @@ import { carouselSlides} from '../data/slides';
  * - Accessible with ARIA labels
  */
 export default function Hero(): JSX.Element {
+    const [slides, setSlides] = useState<Slide[]>([]);
     const [activeSlide, setActiveSlide] = useState<number>(0);
     const [isPaused, setIsPaused] = useState<boolean>(false);
     const intervalRef: RefObject<NodeJS.Timeout | null> = useRef(null);
+    const heroRef: RefObject<HTMLElement | null> = useRef(null);
+
+    useEffect(() => {
+        const loadSlides = async (): Promise<void> => {
+            const response: Response = await fetch('/data/slides.json');
+            const data = await response.json() as Slide[];
+            setSlides(data);
+        };
+
+        void loadSlides();
+    }, []);
 
     const nextSlide = useCallback((): void => {
-        setActiveSlide((prev: number): number => (prev === carouselSlides.length - 1 ? 0 : prev + 1));
-    }, []);
+        if (slides.length === 0) {
+            return;
+        }
+        setActiveSlide((prev: number): number => (prev === slides.length - 1 ? 0 : prev + 1));
+    }, [slides.length]);
 
     const prevSlide = useCallback((): void => {
-        setActiveSlide((prev: number): number => (prev === 0 ? carouselSlides.length - 1 : prev - 1));
-    }, []);
+        if (slides.length === 0) {
+            return;
+        }
+        setActiveSlide((prev: number): number => (prev === 0 ? slides.length - 1 : prev - 1));
+    }, [slides.length]);
 
     const goToSlide = useCallback((index: number): void => {
         setActiveSlide(index);
@@ -31,6 +49,10 @@ export default function Hero(): JSX.Element {
 
     // Auto-advance slides with pause on hover
     useEffect(() => {
+        if (slides.length === 0) {
+            return;
+        }
+
         const startInterval = (): void => {
             if (!isPaused) {
                 intervalRef.current = setInterval(nextSlide, 5000);
@@ -44,32 +66,35 @@ export default function Hero(): JSX.Element {
                 clearInterval(intervalRef.current);
             }
         };
-    }, [isPaused, nextSlide]);
+    }, [isPaused, nextSlide, slides.length]);
 
-    // Handle keyboard navigation
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent): void => {
-            if (e.key === 'ArrowLeft') {
-                prevSlide();
-            } else if (e.key === 'ArrowRight') {
-                nextSlide();
-            }
-        };
+        if (slides.length > 0 && activeSlide > slides.length - 1) {
+            setActiveSlide(0);
+        }
+    }, [activeSlide, slides.length]);
 
-        globalThis.addEventListener('keydown', handleKeyDown);
-        return () => globalThis.removeEventListener('keydown', handleKeyDown);
+    const handleKeyDown = useCallback((e: ReactKeyboardEvent<HTMLElement>): void => {
+        if (e.key === 'ArrowLeft') {
+            prevSlide();
+        } else if (e.key === 'ArrowRight') {
+            nextSlide();
+        }
     }, [nextSlide, prevSlide]);
 
     return (
         <section
             id="hero"
             className="relative h-screen overflow-hidden"
+            ref={heroRef}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
+            onKeyDown={handleKeyDown}
+            tabIndex={0}
             aria-label="Hero Carousel"
         >
             {/* Slides */}
-            {carouselSlides.map((slide) => (
+            {slides.map((slide) => (
                 <div
                     key={slide.id}
                     className={`absolute inset-0 transition-opacity duration-1000 ${
@@ -78,7 +103,7 @@ export default function Hero(): JSX.Element {
                     aria-hidden={slide.id - 1 !== activeSlide}
                     role="group"
                     aria-roledescription="slide"
-                    aria-label={`${slide.alt} ${slide.id} of ${carouselSlides.length}`}
+                    aria-label={`${slide.alt} ${slide.id} of ${slides.length}`}
                 >
                     {/* Background Image with Overlay */}
                     <div
@@ -92,7 +117,7 @@ export default function Hero(): JSX.Element {
 
             {/* Navigation Dots */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3 z-10" role="tablist" aria-label="Slide navigation">
-                {carouselSlides.map((slide) => (
+                {slides.map((slide) => (
                     <button
                         key={slide.id}
                         onClick={() => goToSlide(slide.id - 1)}

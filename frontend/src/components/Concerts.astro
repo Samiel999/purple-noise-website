@@ -1,7 +1,5 @@
 ---
-import { upcomingConcerts, pastConcerts, type Concert } from '../data/concerts';
-// import from 'fs';
-// import {readFile} from "node:fs";
+import {type Concert, pastConcerts, upcomingConcerts} from '../data/concerts';
 
 function formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -13,11 +11,6 @@ function formatDate(dateString: string): string {
     });
 }
 
-// let upcomingConcerts: Concert[];
-//
-// readFile('../data/concerts.json', 'utf-8', (err, data) => {
-//
-// })
 
 // Generate structured data for SEO
 const generateStructuredData = () => {
@@ -127,4 +120,4 @@ const generateStructuredData = () => {
 </section>
 
 <!-- Structured Data for SEO -->
-<script type="application/ld+json" set:html={generateStructuredData()} />
+<script is:inline type="application/ld+json" set:html={generateStructuredData()} />

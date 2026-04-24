@@ -1,13 +1,12 @@
-import React, {type ChangeEvent, type FormEvent} from 'react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type ChangeEvent } from 'react';
 
 const contactInfo = {
     email: "info@purple-noise.de",
     phone: "+49 (0)30 12345678",
+    phoneHref: "+493012345678",
     socialMedia: [
-        { name: "Facebook", url: "#", icon: "facebook" },
-        { name: "Instagram", url: "#", icon: "instagram" },
-        { name: "YouTube", url: "#", icon: "youtube" },
+        { name: "Facebook", url: "https://www.facebook.com/purplenoisechoir/", icon: "facebook" },
+        { name: "Instagram", url: "https://www.instagram.com/purplenoisechoir/", icon: "instagram" },
     ],
 };
 
@@ -64,7 +63,7 @@ export default function Contact() {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
 
-    const handleSubmit = useCallback((e: FormEvent): void => {
+    const handleSubmit = useCallback((e: { preventDefault: () => void }): void => {
         e.preventDefault();
 
         // Validate form
@@ -131,7 +130,7 @@ export default function Contact() {
                             </a>
 
                             {/* Phone */}
-                            <a href={`tel:${contactInfo.phone}`} className="flex items-start group">
+                            <a href={`tel:${contactInfo.phoneHref}`} className="flex items-start group">
                                 <div className="w-14 h-14 bg-(--color-primary)/20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-(--color-primary)/30 transition-colors duration-200">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-(--color-primary)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />

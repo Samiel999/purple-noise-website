@@ -1,4 +1,29 @@
-import {useState, useEffect, useRef, useCallback, type RefObject} from 'react';
+import {useState, useEffect, useRef, useCallback, type JSX} from 'react';
+
+const socialLinks = [
+    {name: 'Instagram', href: 'https://www.instagram.com/purplenoisechoir/', icon: 'instagram'},
+    {name: 'Facebook', href: 'https://www.facebook.com/purplenoisechoir/', icon: 'facebook'}
+];
+
+const renderSocialIcon = (iconName: string): JSX.Element | null => {
+    if (iconName === 'facebook') {
+        return (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+        );
+    }
+
+    if (iconName === 'instagram') {
+        return (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+        );
+    }
+
+    return null;
+};
 
 /**
  * Navigation Component
@@ -12,9 +37,8 @@ import {useState, useEffect, useRef, useCallback, type RefObject} from 'react';
  */
 export default function Navigation() {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-    const menuRef: RefObject<HTMLElement | null> | undefined = useRef(null);
-    const buttonRef: RefObject<HTMLButtonElement | null> = useRef(null);
-    const previousActiveElement: RefObject<HTMLElement | Element | null> = useRef(null);
+    const menuRef = useRef<HTMLDialogElement | null>(null);
+    const previousActiveElement = useRef<HTMLElement | null>(null);
 
     const handleMenuToggle = useCallback((): void => {
         setIsMenuOpen((prev: boolean) => !prev);
@@ -28,45 +52,51 @@ export default function Navigation() {
         setIsMenuOpen(false);
     }, []);
 
-    // Focus management and keyboard handling
+    // Keep native dialog state in sync with React state.
     useEffect(() => {
-        if (isMenuOpen) {
-            // Store the currently focused element to restore later
-            previousActiveElement.current = document.activeElement;
+        const dialogElement = menuRef.current;
+        if (!dialogElement) {
+            return;
+        }
 
-            // Prevent body scroll
+        if (isMenuOpen) {
+            previousActiveElement.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+            if (!dialogElement.open) {
+                dialogElement.showModal();
+            }
             document.body.style.overflow = 'hidden';
 
-            // Focus the first focusable element in the menu
-            const focusableElements: NodeListOf<HTMLElement> | undefined = menuRef.current?.querySelectorAll(
+            const focusableElements: NodeListOf<HTMLElement> | undefined = dialogElement.querySelectorAll(
                 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
             );
-            if (focusableElements && focusableElements.length > 0) {
-                focusableElements[0].focus();
-            }
-
-            // Add escape key listener
-            const handleEscape = (e: KeyboardEvent): void => {
-                if (e.key === 'Escape') {
-                    closeMenu();
-                }
-            };
-
-            document.addEventListener('keydown', handleEscape);
-
-            return (): void => {
-                document.removeEventListener('keydown', handleEscape);
-                document.body.style.overflow = '';
-
-                // Restore focus to the button that opened the menu
-                if (previousActiveElement.current) {
-                    if ("focus" in previousActiveElement.current) {
-                        previousActiveElement.current.focus();
-                    }
-                }
-            };
+            focusableElements?.[0]?.focus();
+            return;
         }
-    }, [isMenuOpen, closeMenu]);
+
+        if (dialogElement.open) {
+            dialogElement.close();
+        }
+        document.body.style.overflow = '';
+        previousActiveElement.current?.focus();
+    }, [isMenuOpen]);
+
+    useEffect(() => {
+        const dialogElement = menuRef.current;
+        if (!dialogElement) {
+            return;
+        }
+
+        const handleClose = (): void => {
+            setIsMenuOpen(false);
+            document.body.style.overflow = '';
+            previousActiveElement.current?.focus();
+        };
+
+        dialogElement.addEventListener('close', handleClose);
+        return (): void => {
+            dialogElement.removeEventListener('close', handleClose);
+        };
+    }, []);
 
     // Focus trap within the menu
     useEffect(() => {
@@ -99,43 +129,68 @@ export default function Navigation() {
 
     return (
         <>
-            {/* Menu Toggle Button - Logo only */}
-            <button
-                ref={buttonRef}
-                onClick={handleMenuToggle}
-                className="fixed top-4 right-4 z-40 p-2 hover:opacity-70 transition-opacity duration-200"
-                aria-label="Menü öffnen"
-                aria-expanded={isMenuOpen}
-                aria-controls="slide-menu"
-            >
-                <img
-                    src="/images/logo.png"
-                    alt="Menü"
-                    className="h-10 w-auto"
-                />
-            </button>
+            {/* Header Bar */}
+            <header className="fixed inset-x-0 top-0 z-40 border-b border-white/10 bg-(--color-dark)/75 backdrop-blur-sm">
+                <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-3 sm:px-6">
+                    <div className="flex items-center gap-2 justify-self-start">
+                        {socialLinks.map((socialLink) => (
+                            <a
+                                key={socialLink.name}
+                                href={socialLink.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex h-9 w-9 items-center justify-center rounded-md text-(--color-text) hover:bg-white/10 hover:text-(--color-accent) transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-dark)"
+                                aria-label={`${socialLink.name} (oeffnet in neuem Tab)`}
+                            >
+                                {renderSocialIcon(socialLink.icon)}
+                            </a>
+                        ))}
+                    </div>
+
+                    <a
+                        href="/#hero"
+                        className="justify-self-center whitespace-nowrap px-2 text-lg font-semibold tracking-wide text-(--color-text) hover:text-(--color-accent) transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-dark) sm:text-2xl md:text-3xl"
+                    >
+                        Purple Noise
+                    </a>
+
+                    <div className="justify-self-end">
+                        <button
+                            onClick={handleMenuToggle}
+                            className="rounded-md p-2 hover:opacity-80 transition-opacity duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-dark)"
+                            aria-label={isMenuOpen ? 'Menü schließen' : 'Menü öffnen'}
+                            aria-expanded={isMenuOpen}
+                            aria-controls="slide-menu"
+                        >
+                            <img
+                                src="/images/logo.png"
+                                alt=""
+                                className="h-10 w-auto"
+                            />
+                        </button>
+                    </div>
+                </div>
+            </header>
 
             {/* Menu Overlay */}
-            <div
+            <dialog
                 id="slide-menu"
                 className={`fixed inset-0 z-50 transition-opacity duration-300 ${
                     isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
                 }`}
-                role="dialog"
-                aria-modal="true"
                 aria-label="Hauptmenü"
+                ref={menuRef}
             >
                 {/* Overlay Background */}
                 <button
                     className="absolute inset-0 bg-linear-to-br from-(--color-primary)/90 to-(--color-primary-dark)/95 backdrop-blur-md"
                     tabIndex={isMenuOpen ? 0 : -1}
-                    onClick={handleMenuToggle}
+                    onClick={closeMenu}
                     aria-label="Menü schließen"
                 />
 
                 {/* Menu Content */}
                 <nav
-                    ref={menuRef}
                     className={`absolute top-0 right-0 h-full w-full max-w-md transform transition-transform duration-500 ease-out ${
                         isMenuOpen ? 'translate-x-0' : 'translate-x-full'
                     }`}
@@ -168,7 +223,7 @@ export default function Navigation() {
                             <ul className="space-y-8">
                                 <li>
                                     <a
-                                        href="#hero"
+                                        href="/#hero"
                                         onClick={handleLinkClick}
                                         className="block text-3xl md:text-4xl font-light text-white hover:text-(--color-accent) transition-colors duration-300 transform hover:translate-x-4"
                                     >
@@ -177,7 +232,7 @@ export default function Navigation() {
                                 </li>
                                 <li>
                                     <a
-                                        href="#concerts"
+                                        href="/#concerts"
                                         onClick={handleLinkClick}
                                         className="block text-3xl md:text-4xl font-light text-white hover:text-(--color-accent) transition-colors duration-300 transform hover:translate-x-4"
                                     >
@@ -186,7 +241,7 @@ export default function Navigation() {
                                 </li>
                                 <li>
                                     <a
-                                        href="#rehearsals"
+                                        href="/#rehearsals"
                                         onClick={handleLinkClick}
                                         className="block text-3xl md:text-4xl font-light text-white hover:text-(--color-accent) transition-colors duration-300 transform hover:translate-x-4"
                                     >
@@ -195,7 +250,7 @@ export default function Navigation() {
                                 </li>
                                 <li>
                                     <a
-                                        href="#contact"
+                                        href="/#contact"
                                         onClick={handleLinkClick}
                                         className="block text-3xl md:text-4xl font-light text-white hover:text-(--color-accent) transition-colors duration-300 transform hover:translate-x-4"
                                     >
@@ -211,7 +266,7 @@ export default function Navigation() {
                         </div>
                     </div>
                 </nav>
-            </div>
+            </dialog>
         </>
     );
 }
